@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include "ACNL-CheckItemWhitelist.h"
 
 void    wait_to_exit(void)
 {
@@ -13,15 +14,18 @@ void    wait_to_exit(void)
 
 bool CheckItemWhitelist(int itemID)
 {
-    int maxID;
-    int chk;
-    int exception = itemID;
+    //Real Max ID is 0x372B (exclude wrap paper) but for checks game -= 0x2000 from orig item ID
+    static const u32 maxID = 0x172B;
+    u32 chk;
+    u32 exception = itemID;
 
     exception &= 0x6000;
     if (exception == 0x4000) //If item is wrapping paper / Any item ID between 0x4000 - 0x5FFF
-    goto ItemIsInventoryWhitelisted;
+    {
+        printf("0x%04X is an Exception Item!", itemID);
+        goto ItemIsInventoryWhitelisted;
+    }
 
-    maxID = 0x172B; //Real Max ID is 0x372B (exclude wrap paper) but for checks game -= 0x2000 from orig item ID
     itemID = itemID & ~0x8000;
     chk = itemID - 0x2000; //To cover items lower than 0x2000 (Enviroment Items)
 
@@ -41,7 +45,7 @@ bool CheckItemWhitelist(int itemID)
 int main()
 {
     char inputid[20];
-    int itemid;
+    u32 itemid;
     int inputidlength;
     printf("\n~~ ACNL Item ID Validator by Slattz ~~\n\n");
     printf("Input the item ID [in hex w/ 0x] below:\n");
